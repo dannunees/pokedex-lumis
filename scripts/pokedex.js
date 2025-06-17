@@ -36,6 +36,46 @@ async function fetchPokemons() {
   }
 }
 
+async function fetchTypes() {
+  const res = await fetch("https://pokeapi.co/api/v2/type");
+  const data = await res.json();
+  const select = document.getElementById("typeFilter");
+  data.results.forEach(type => {
+    const option = document.createElement("option");
+    option.value = type.name;
+    option.textContent = type.name[0].toUpperCase() + type.name.slice(1);
+    select.appendChild(option);
+  });
+}
+
+document.getElementById("typeFilter").addEventListener("change", async (e) => {
+  const type = e.target.value;
+  if (type === "") {
+    currentPage = 1;
+    offset = 0;
+    fetchPokemons();
+  } else {
+    pokemonList.innerHTML = "<p>Carregando...</p>";
+    try {
+      const res = await fetch(`https://pokeapi.co/api/v2/type/${type}`);
+      const data = await res.json();
+      const pokemons = await Promise.all(
+        data.pokemon.slice(0, limit).map(async (p) => {
+          const res = await fetch(p.pokemon.url);
+          return res.json();
+        })
+      );
+      displayPokemons(pokemons);
+      pageNumbers.innerHTML = "";
+      prevButton.disabled = true;
+      nextButton.disabled = true;
+    } catch (err) {
+      pokemonList.innerHTML = "<p>Erro ao filtrar por tipo.</p>";
+    }
+  }
+});
+
+
 function displayPokemons(pokemons) {
   pokemonList.innerHTML = pokemons.map(p => `
     <div class="pokemonList__card fade-in" data-id="${p.id}">
@@ -166,5 +206,6 @@ nextButton.addEventListener("click", () => {
 
 (async () => {
   await fetchTotalCount();
+  await fetchTypes();
   fetchPokemons();
 })();

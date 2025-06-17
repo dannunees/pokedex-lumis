@@ -127,6 +127,13 @@ main {
         }
     }
 
+    .filterSelect {
+        background: #f2f2f7;
+        border: none;
+        padding: 16px;
+        border-radius: 8px;
+        margin: 32px 0 16px;
+    }
       
     .pokemonList {
         display: grid;
